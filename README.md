@@ -4,10 +4,9 @@
 
 # Miro Board:
 
-
 # Aufgaben
 
-1: [ ] Planung und Entscheidung Tech Stack 
+1: [x] Planung und Entscheidung Tech Stack
 
 2: [ ] Repository Herstellen
 
