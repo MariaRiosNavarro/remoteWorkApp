@@ -6,6 +6,13 @@ import cookieParser from "cookie-parser";
 
 dotenv.config();
 
+export function connectToDatabase() {
+  const dbUrl = process.env.MONGO_ATLAS_URI;
+  return mongoose.connect(dbUrl, { dbName: "remoteWork" });
+}
+
+connectToDatabase();
+
 export const app = express();
 
 app.use(
@@ -14,3 +21,7 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(morgan("dev"));
