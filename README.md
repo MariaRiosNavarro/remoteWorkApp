@@ -16,11 +16,13 @@
 
 5: [x] Erweiterung Backend:
 
-6: [x] Backend: Auth Routen -  20:30 Uhr (2,5 Stunden)
+6: [x] Backend: Auth Routen 
 
-    6.1 (Routes Jest Test ? )
+    6.1 [ ] ( Auth Routes Jest Test ? )
 
-7: [ ] Backend: Time Routen (testing Jest?)
+7: [x] Backend: Time Routen
+
+    7.1 [ ] ( Time Routes Jest Test ?)
 
 8: [ ] Frontend: Erweiterung Frontend
 
