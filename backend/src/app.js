@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import { router as authRouter } from "./routes/auth.routes.js";
+import { router as timeRouter } from "./routes/time.routes.js";
 
 dotenv.config();
 
@@ -29,3 +30,4 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRouter);
+app.use("/api/time", timeRouter);
