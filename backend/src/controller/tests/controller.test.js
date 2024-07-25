@@ -76,3 +76,62 @@ describe("Auth Controller", () => {
     });
   });
 });
+
+describe("Time Controller - openTime", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("sollte 404 zurückgeben, wenn der Benutzer nicht gefunden wurde", async () => {
+    UserModel.findById.mockResolvedValue(null);
+
+    const response = await request(app).post("/time/12345");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({ message: "Benutzer nicht gefunden" });
+  });
+
+  it("sollte 201 zurückgeben und den neuen Zeiteintrag, wenn erfolgreich", async () => {
+    const mockUser = { userId: "12345" };
+    UserModel.findById.mockResolvedValue(mockUser);
+
+    const mockTime = {
+      _id: "timeId",
+      userIdRef: "12345",
+      startTime: new Date(),
+      status: "open",
+      save: jest.fn().mockResolvedValue(true),
+    };
+
+    TimeModel.mockImplementation(() => mockTime);
+
+    const response = await request(app).post("/time/12345");
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({
+      success: true,
+      data: {
+        _id: "timeId",
+        userIdRef: "12345",
+        startTime: expect.any(String),
+        status: "open",
+      },
+      message: "Homeoffice-Zeit erfolgreich gestartet ✅",
+    });
+
+    expect(mockTime.save).toHaveBeenCalled();
+  });
+
+  it("sollte 500 zurückgeben, wenn ein Fehler auftritt", async () => {
+    UserModel.findById.mockRejectedValue(new Error("Datenbankfehler"));
+
+    const response = await request(app).post("/time/12345");
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      success: false,
+      message: "Fehler beim Öffnen der Homeoffice-Zeit",
+      error: "Datenbankfehler",
+    });
+  });
+});
