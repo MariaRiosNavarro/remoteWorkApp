@@ -93,3 +93,59 @@ export const closeTime = async (req, res) => {
     });
   }
 };
+
+/**
+ * Ruft alle Homeoffice-Zeiterfassungen für einen Benutzer für ein Bestimmten Tag ab..
+ */
+
+export const getAllTimeOneUserOneDay = async (req, res) => {
+  try {
+    const { userId, date } = req.params;
+
+    // format: JJJJ-MM-DD
+
+    // Benutzer suchen
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Benutzer nicht gefunden",
+      });
+    }
+
+    // Den Datumsbereich für das angegebene Datum erstellen
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0); // Anfang des Tages festlegen
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setUTCHours(23, 59, 59, 999); // Ende des Tages festlegen
+
+    // Zeiteinträge des Benutzers für den angegebenen Tag suchen
+    const timePeriods = await TimeModel.find({
+      userIdRef: userId,
+      startTime: { $gte: startOfDay, $lt: endOfDay },
+    }).sort({ startTime: -1 });
+
+    // Wenn keine Einträge gefunden wurden, leeres Array zurückgeben
+    if (!timePeriods || timePeriods.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "Keine Zeiteinträge für diesen Tag gefunden",
+      });
+    }
+
+    // Gefundene Zeiteinträge zurückgeben
+    res.status(200).json({
+      success: true,
+      data: timePeriods,
+      message: "Zeiteinträge für den angegebenen Tag erfolgreich abgerufen",
+    });
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Zeiteinträge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Fehler beim Abrufen der Zeiteinträge",
+      error: error.message,
+    });
+  }
+};
