@@ -80,8 +80,7 @@ export const closeTime = async (req, res) => {
     res.status(200).json({
       success: true,
       data: time,
-      message:
-        "Homeoffice-Zeit erfolgreich beendet und Email gesendet gesendet ✅",
+      message: "Homeoffice-Zeit erfolgreich beendet und Email gesendet ✅",
     });
   } catch (error) {
     console.error("Fehler beim Schließen der Homeoffice-Zeit:", error);
@@ -101,6 +100,14 @@ export const closeTime = async (req, res) => {
 export const getAllTimeOneUserOneDay = async (req, res) => {
   try {
     const { userId, date } = req.params;
+
+    // Überprüfen, ob das Datumsformat gültig ist
+    if (!Date.parse(date)) {
+      return res.status(400).json({
+        success: false,
+        message: "Ungültiges Datum",
+      });
+    }
 
     // format: JJJJ-MM-DD
 
