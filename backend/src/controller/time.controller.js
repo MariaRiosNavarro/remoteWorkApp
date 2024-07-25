@@ -1,6 +1,7 @@
 import { TimeModel } from "./../models/time.model.js";
 import { UserModel } from "./../models/user.model.js";
 import { calculateDuration } from "../utils/calculateDuration.js";
+import { sendEmail } from "./../utils/emailConfig.js";
 
 /**
  * Öffnet eine neue Homeoffice-Zeiterfassung für einen Benutzer.
@@ -74,17 +75,20 @@ export const closeTime = async (req, res) => {
     // Benutzerinformationen abrufen
     const user = await UserModel.findById(userId);
 
+    await sendEmail(user, time);
+
     res.status(200).json({
       success: true,
       data: time,
-      message: "Homeoffice-Zeit erfolgreich beendet ✅",
+      message:
+        "Homeoffice-Zeit erfolgreich beendet und Email gesendet gesendet ✅",
     });
   } catch (error) {
     console.error("Fehler beim Schließen der Homeoffice-Zeit:", error);
     res.status(500).json({
       success: false,
       message:
-        "Fehler beim Schließen der Homeoffice-Zeit oder Senden der Benachrichtigung",
+        "Fehler beim Schließen der Homeoffice-Zeit oder Senden der Email",
       error: error.message,
     });
   }
