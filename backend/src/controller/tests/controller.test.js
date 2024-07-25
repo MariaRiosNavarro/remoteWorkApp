@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.post("/login", login);
 app.post("/time/:userId", openTime);
-app.post("/time/:userId/:timeId", closeTime);
+app.put("/time/:userId/:timeId", closeTime);
 
 describe("Auth Controller", () => {
   beforeEach(() => {
@@ -132,6 +132,78 @@ describe("Time Controller - openTime", () => {
       success: false,
       message: "Fehler beim Öffnen der Homeoffice-Zeit",
       error: "Datenbankfehler",
+    });
+  });
+});
+
+describe("Time Controller - closeTime", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("closeTime", () => {
+    it("sollte 200 zurückgeben und den geschlossenen Zeiteintrag, wenn erfolgreich", async () => {
+      const mockTime = {
+        _id: "timeId",
+        userIdRef: "12345",
+        startTime: new Date("2023-01-01T09:00:00Z"),
+        endTime: null,
+        status: "open",
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      TimeModel.findOne.mockResolvedValue(mockTime);
+      UserModel.findById.mockResolvedValue({ email: "test@example.com" });
+      calculateDuration.mockReturnValue(8);
+      sendEmail.mockResolvedValue(true);
+
+      const response = await request(app).put("/time/12345/timeId");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        success: true,
+        data: expect.objectContaining({
+          _id: "timeId",
+          userIdRef: "12345",
+          status: "close",
+          endTime: expect.any(String),
+          durationTime: 8,
+        }),
+        message: "Homeoffice-Zeit erfolgreich beendet und Email gesendet ✅",
+      });
+
+      expect(TimeModel.findOne).toHaveBeenCalledWith({
+        _id: "timeId",
+        userIdRef: "12345",
+        status: "open",
+      });
+      expect(mockTime.save).toHaveBeenCalled();
+      expect(sendEmail).toHaveBeenCalled();
+    });
+
+    it("sollte 404 zurückgeben, wenn kein offener Zeiteintrag gefunden wurde", async () => {
+      TimeModel.findOne.mockResolvedValue(null);
+
+      const response = await request(app).put("/time/12345/timeId").send();
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({
+        message: "Kein offener Zeiteintrag gefunden",
+      });
+    });
+
+    it("sollte 500 zurückgeben, wenn ein Fehler auftritt", async () => {
+      TimeModel.findOne.mockRejectedValue(new Error("Datenbankfehler"));
+
+      const response = await request(app).put("/time/12345/timeId");
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message:
+          "Fehler beim Schließen der Homeoffice-Zeit oder Senden der Email",
+        error: "Datenbankfehler",
+      });
     });
   });
 });

@@ -80,8 +80,7 @@ export const closeTime = async (req, res) => {
     res.status(200).json({
       success: true,
       data: time,
-      message:
-        "Homeoffice-Zeit erfolgreich beendet und Email gesendet gesendet ✅",
+      message: "Homeoffice-Zeit erfolgreich beendet und Email gesendet ✅",
     });
   } catch (error) {
     console.error("Fehler beim Schließen der Homeoffice-Zeit:", error);
