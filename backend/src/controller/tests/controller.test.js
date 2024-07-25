@@ -1,7 +1,11 @@
 import request from "supertest";
 import express from "express";
 import { login } from "../auth.controller.js";
-import { openTime, closeTime } from "../time.controller.js";
+import {
+  openTime,
+  closeTime,
+  getAllTimeOneUserOneDay,
+} from "../time.controller.js";
 import { UserModel } from "../../models/user.model.js";
 import { TimeModel } from "../../models/time.model.js";
 import { createHash, createToken } from "../../service/auth.service.js";
@@ -19,6 +23,7 @@ app.use(express.json());
 app.post("/login", login);
 app.post("/time/:userId", openTime);
 app.put("/time/:userId/:timeId", closeTime);
+app.get("/time/:userId/:date", getAllTimeOneUserOneDay);
 
 describe("Auth Controller", () => {
   beforeEach(() => {
@@ -204,6 +209,79 @@ describe("Time Controller - closeTime", () => {
           "Fehler beim Schließen der Homeoffice-Zeit oder Senden der Email",
         error: "Datenbankfehler",
       });
+    });
+  });
+});
+
+describe("Time Controller - getAllTimeOneUserOneDay", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    UserModel.findById.mockReset().mockResolvedValue({ _id: "12345" });
+    TimeModel.find.mockReset().mockReturnValue({
+      sort: jest.fn().mockResolvedValue([]),
+    });
+  });
+
+  it("sollte 200 mit leeren Daten zurückgeben, wenn keine Zeiteinträge gefunden werden", async () => {
+    try {
+      const response = await request(app).get("/time/12345/2023-01-01");
+
+      expect(UserModel.findById).toHaveBeenCalledWith("12345");
+      expect(TimeModel.find).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        success: true,
+        data: [],
+        message: "Keine Zeiteinträge für diesen Tag gefunden",
+      });
+    } catch (error) {
+      console.error("Test error:", error);
+      throw error;
+    }
+  });
+
+  it("sollte 200 mit Zeiteinträgen zurückgeben, wenn Daten gefunden werden", async () => {
+    UserModel.findById.mockResolvedValue({ _id: "12345" });
+    const mockTimePeriods = [
+      { _id: "1", startTime: "2023-01-01T10:00:00Z" },
+      { _id: "2", startTime: "2023-01-01T14:00:00Z" },
+    ];
+    TimeModel.find.mockReturnValue({
+      sort: jest.fn().mockResolvedValue(mockTimePeriods),
+    });
+
+    const response = await request(app).get("/time/12345/2023-01-01");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      success: true,
+      data: mockTimePeriods,
+      message: "Zeiteinträge für den angegebenen Tag erfolgreich abgerufen",
+    });
+  });
+
+  it("sollte 404 zurückgeben, wenn der Benutzer nicht gefunden wird", async () => {
+    UserModel.findById.mockResolvedValue(null);
+
+    const response = await request(app).get("/time/12345/2023-01-01");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      success: false,
+      message: "Benutzer nicht gefunden",
+    });
+  });
+
+  it("sollte 500 zurückgeben, wenn ein Fehler auftritt", async () => {
+    UserModel.findById.mockRejectedValue(new Error("Datenbankfehler"));
+
+    const response = await request(app).get("/time/12345/2023-01-01");
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({
+      success: false,
+      message: "Fehler beim Abrufen der Zeiteinträge",
+      error: "Datenbankfehler",
     });
   });
 });

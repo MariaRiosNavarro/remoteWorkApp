@@ -101,6 +101,14 @@ export const getAllTimeOneUserOneDay = async (req, res) => {
   try {
     const { userId, date } = req.params;
 
+    // Überprüfen, ob das Datumsformat gültig ist
+    if (!Date.parse(date)) {
+      return res.status(400).json({
+        success: false,
+        message: "Ungültiges Datum",
+      });
+    }
+
     // format: JJJJ-MM-DD
 
     // Benutzer suchen
