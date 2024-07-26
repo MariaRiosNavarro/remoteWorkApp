@@ -4,14 +4,19 @@ import ShowPasswordSvg from "./SVG/ShowPasswordSvg";
 import EmailSvg from "./SVG/EmailSvg";
 import { useState, useRef } from "react";
 import { useUser } from "./../context/userProvider";
+import { useNavigate } from "react-router-dom";
+import useFetch from "./../hooks/useFetch";
 
 const UserLogin = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
   const { setUser } = useUser();
+  const { fetchData, loading, error } = useFetch();
 
   const emailRef = useRef();
   const passwordRef = useRef();
+  const navigate = useNavigate();
 
   // ---------------------------------------------------------handleLogin
   const handleLogin = async () => {
@@ -20,8 +25,15 @@ const UserLogin = () => {
       password: passwordRef.current.value,
     };
 
-    setUser(user);
-    console.log(user);
+    const { ok, data } = await fetchData("/api/auth/login", "POST", user);
+
+    if (ok) {
+      let { email, id } = data;
+      setUser({ email, id });
+      navigate("/time");
+    } else {
+      setMessage("You are not registered or your password/user is wrong");
+    }
   };
 
   // ---------------------------------------------------------handleSubmit
@@ -77,6 +89,9 @@ const UserLogin = () => {
             value="Login"
             className="btn btn-active btn-primary"
           />
+
+          {/* --------------------------------------------------------------------------------------MESSAGE STATE */}
+          {message && <p className="p8 rounded-xl bg-warning">{message}</p>}
         </div>
       </section>
     </>
