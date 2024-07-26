@@ -16,17 +16,20 @@
 
 5: [x] Erweiterung Backend:
 
-6: [x] Backend: Auth Routen 
+6: [x] Backend: Auth Routen
 
-    6.1 [ ] ( Auth Routes Jest Test ? )
+    6.1 [x] ( Auth Routes Jest Test ? )
 
 7: [x] Backend: Time Routen
 
-    7.1 [ ] ( Time Routes Jest Test ?)
+    7.1 [x] ( Time Routes Jest Test ?)
 
-8: [ ] Frontend: Erweiterung Frontend
+8: [x] Frontend: Erweiterung Frontend (routing)
 
-9: [ ] F+B : Verwindung Backend + Frontend
+9: [x] F+B : Verwindung Backend + Frontend
+    9.1 [x] Login - Fetch
+    9.2 [ ] Time - Fetch
+    9.3 [ ] Overwiew -Fetch
 
 10: [ ] Testing mit Cypress
 
@@ -49,5 +52,7 @@ npm create vite@latest frontend -- --template react
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 npm i -D daisyui@latest
+npm i react-router-dom
+npm i react-calendar
 
 ```
