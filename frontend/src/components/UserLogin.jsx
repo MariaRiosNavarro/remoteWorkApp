@@ -12,7 +12,7 @@ const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const { setUser } = useUser();
-  const { fetchData, loading, error } = useFetch();
+  const { fetchData } = useFetch();
 
   const emailRef = useRef();
   const passwordRef = useRef();
