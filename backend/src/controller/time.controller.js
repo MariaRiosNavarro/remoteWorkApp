@@ -75,7 +75,7 @@ export const closeTime = async (req, res) => {
     // Benutzerinformationen abrufen
     const user = await UserModel.findById(userId);
 
-    // await sendEmail(user, time);
+    await sendEmail(user, time);
 
     res.status(200).json({
       success: true,
