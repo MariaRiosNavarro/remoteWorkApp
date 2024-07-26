@@ -27,6 +27,9 @@
 8: [x] Frontend: Erweiterung Frontend (routing)
 
 9: [x] F+B : Verwindung Backend + Frontend
+    9.1 [x] Login - Fetch
+    9.2 [ ] Time - Fetch
+    9.3 [ ] Overwiew -Fetch
 
 10: [ ] Testing mit Cypress
 
